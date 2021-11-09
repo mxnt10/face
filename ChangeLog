@@ -1,0 +1,16 @@
+# ChangeLog
+All notable changes to this project will be documented in this file.
+Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
+
+
+## [ Released ] - 2021-11-09 #############################################
+
+### Added / Adicionado
+ - Added install.sh
+ - Added face.png and face.desktop in appdata.
+ - Added clean_cache and clean_conf in common.
+ - Added sources in src.
+ - Addde icons in icon_status.
+###
+
+##########################################################################
