@@ -30,7 +30,10 @@ def notifyMessage(self):
 # Essa função pode variar conforme o webapp.
 def verifyNotify(self, res):
     self.soma = 0
-    tags = res.findAll("div", {"class": "_1pJ9J"})
+    tags = res.findAll(
+        "span",
+        {"class": "bp9cbjyn ljqsnud1 pq6dq46d datstx6m taijpn5t jb3vyjys jxrgncrl qt6c0cv9 qnrpqo6b k4urcfbm"}
+    )
 
     for tag in tags:
         self.soma += int(tag.getText())  # Contabilizando o número de mensagens
