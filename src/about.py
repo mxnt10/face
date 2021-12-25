@@ -1,59 +1,51 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-# Import Modules
+# Módulos do PyQt5
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel
 
-# Import Sources
-from utils import set_icon
-from version import __version__
+# Modulos integrados (src)
+from utils import setIcon
+from version import __version__, __appname__, __pagename__
 
 
-# Class for about dialog
+########################################################################################################################
+
+
+# Classe para o diálogo About.
 class AboutDialog(QDialog):
-    def __init__(self, *args, **kwargs):
-        super(AboutDialog, self).__init__(*args, **kwargs)
-
-        # Properties window
-        self.setWindowTitle('About Face')
+    def __init__(self):
+        super(AboutDialog, self).__init__()
+        self.setWindowTitle('About ' + __appname__)
         self.setFixedSize(0, 0)
 
-        # Define button OK
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
-        # noinspection PyUnresolvedReferences
-        self.buttonBox.accepted.connect(self.accept)
-
-        # Define layout and text title
-        layout = QVBoxLayout()
-        title = QLabel('  Face - FaceBook Desktop  ')
+        # Título e Logo
+        title = QLabel(__pagename__)
         font = title.font()
         font.setPointSize(20)
         title.setFont(font)
-        layout.addWidget(title)
-
-        # Define logo for about
         logo = QLabel()
-        logo.setPixmap(QPixmap(set_icon('original')))
+        logo.setPixmap(QPixmap(setIcon('original')))
+
+        # Layout com as informações
+        layout = QVBoxLayout()
+        layout.addWidget(title)
         layout.addWidget(logo)
-
-        # Text items
-        layout.addWidget(QLabel('Version ' + str(__version__) + '\n'))
+        layout.addWidget(QLabel('Version ' + __version__ + '\n'))
         layout.addWidget(QLabel('Maintainer: Mauricio Ferrari'))
-        layout.addWidget(QLabel('Contact: m10ferrari1200@gmail.com\n'))
+        layout.addWidget(QLabel('Contact: m10ferrari1200@gmail.com'))
+        layout.addWidget(QLabel('License: GNU General Public License Version 3 (GLPv3)\n'))
 
-        # Define items in center
-        for i in range(0, layout.count()):
+        for i in range(0, layout.count()):  # Definindo os widgets no centro
             layout.itemAt(i).setAlignment(Qt.AlignHCenter)
 
-        # Create layout
-        layout.addWidget(self.buttonBox)
+        layout.addWidget(QDialogButtonBox(QDialogButtonBox.Ok, clicked=self.accept))
         self.setLayout(layout)
 
-    # Capture event on minimize
+
+    # Evitando que o diálogo About minimize.
     def changeEvent(self, event):
         if event.type() == QEvent.WindowStateChange:
-            # noinspection PyTypeChecker
             if self.windowState() & Qt.WindowMinimized:
                 self.showMaximized()
