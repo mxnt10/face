@@ -41,4 +41,4 @@ def verifyNotify(self, res):
                 self.notify_sound.play()
             if set_json('NotifyMessage'):
                 notifyMessage(self)
-        self.notify = self.soma  # Necessário para mapear alterações no número de
+        self.notify = self.soma  # Necessário para mapear alterações no número de notificações
