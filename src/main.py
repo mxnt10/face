@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 # Módulos importados
-from bs4 import BeautifulSoup  # pip install beautifulsoup4
+from lxml import html  # pip install lxml
+from locale import getdefaultlocale
 from logging import warning
 from os.path import isfile, expanduser
 from sys import argv
@@ -11,7 +12,8 @@ from sys import argv
 from PyQt5.QtCore import QUrl, QFileInfo, pyqtSlot, QMargins, Qt, QEvent, QTimer, pyqtSignal
 from PyQt5.QtGui import QIcon, QDesktopServices
 from PyQt5.QtMultimedia import QMediaPlayer
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineDownloadItem, QWebEngineSettings
+from PyQt5.QtWebEngineWidgets import (QWebEngineView, QWebEnginePage, QWebEngineDownloadItem, QWebEngineSettings,
+                                      QWebEngineProfile)
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QSystemTrayIcon, QMenu, QAction
 
 # Modulos integrados (src)
@@ -146,11 +148,13 @@ class MainWindow(QMainWindow):
 
     # Função que manipula o código-fonte do webapp para checar as mensagens não lidas, emitindo sons,
     # exibindo mensagens e alterando o ícone de notificação.
-    def processHtml(self, html):
-        res = BeautifulSoup(html, 'html.parser')
-        verifyNotify(self, res)
+    def processHtml(self, htm):
+        res = html.fromstring(htm)
+        title = res.xpath('//title')
         try:
-            if __err__ in res.title:  # Em caso de erro de conexão o título inicial não se altera
+            if not __err__ in title[0].text:
+                verifyNotify(self, res)
+            if __err__ in title[0].text:  # Em caso de erro de conexão o título inicial não se altera
                 if self.changeTray != 1:
                     self.tray.setIcon(QIcon(setIcon('error')))
                     self.changeTray = 1
@@ -174,20 +178,21 @@ class MainWindow(QMainWindow):
         cap_url = link  # O link precisa ser salvo numa variável, pois o link é perdido ao tirar o mouse de cima
 
 
-    # Ativar a reconexão WhatsApp Web pela alteração do título.
+    # Ações após finalizar o carregamento do webapp.
     def loaded(self):
         if self.view.page().title() == __err__:  # Se der erro de conexão o título inicial não muda
             if not self.reload_start and set_json('AutoReload'):  # Autorreconexão
                 self.reload.start()
                 self.notify = self.changeTray = 0
                 self.reload_start = True
-                if self.notify_start:  # Notificação pode ser desativada para economizar recursos de processamento
-                    self.notify_loop.stop()
-                    self.notify_start = False
+            if self.notify_start:  # Notificação pode ser desativada para economizar recursos de processamento
+                self.notify_loop.stop()
+                self.tray.setIcon(QIcon(setIcon('error')))
         else:
             if self.reload_start:  # Ao voltar a conexão o loop deve parar
                 self.reload.stop()
                 self.reload_start = False
+                self.notify_start = False
         if not self.notify_start and set_json('TrayIcon'):  # Ativa o som de notificação
             self.notify_loop.start()
             self.notify_start = True  # Não precisa ficar reativando o som cada vez que o webapp é recarregado
@@ -373,6 +378,8 @@ if __name__ == '__main__':
     # Inicialização do programa
     app = QApplication(argv + arg)
     app.setApplicationName(__appname__)
+    lang = getdefaultlocale()[0]
+    QWebEngineProfile.defaultProfile().setHttpAcceptLanguage(lang.split('_')[0])
     clipboard = app.clipboard()
     main = MainWindow()
 
