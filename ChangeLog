@@ -3,114 +3,79 @@ All notable changes to this project will be documented in this file.
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 
-## [ Released ] - 2021-12-25 #############################################
+## [ 2.1 ] - 2021-12-26 #############################################
 
 ### Added / Adicionado
- - Electron:
-	- 
- - Games:
-	- 
- - Java:
-	- 
- - Python:
-	- 
- - Softwares:
-	- 
- - Others:
-	- 
- - Specific:
-	- 
- - Extra:
-	- 
-###
-
-### Upgraded / Atualizado
- - Electron:
-	- 
- - Games:
-	- 
- - Java:
-	- 
- - Python:
-	- 
- - Softwares:
-	- 
- - Others:
-	- 
- - Specific:
-	- 
- - Extra:
-	- 
-###
-
-### Changed / Modificado
- - Electron:
-	- 
- - Games:
-	- 
- - Java:
-	- 
- - Python:
-	- 
- - Softwares:
-	- 
- - Others:
-	- 
- - Specific:
-	- 
- - Extra:
-	- 
-###
-
-### Removed / Removido
- - Electron:
-	- 
- - Games:
-	- 
- - Java:
-	- 
- - Python:
-	- 
- - Softwares:
-	- 
- - Others:
-	- 
- - Specific:
-	- 
- - Extra:
-	- 
+ - Autodetect language.
 ###
 
 ### Fixed / Corrigido
- - Electron:
-	- 
- - Games:
-	- 
- - Java:
-	- 
- - Python:
-	- 
- - Softwares:
-	- 
- - Others:
-	- 
- - Specific:
-	- 
- - Extra:
-	- 
+ - Actions after loaded webapp.
 ###
 
-##########################################################################
+#####################################################################
 
 
-## [ Released ] - 2021-11-09 #############################################
+## [ 2.0 ] - 2021-12-22 #############################################
+
+### Added / Adicionado
+ - Files and Sources:
+    - Added RELEASE file.
+    - Added mp3 files in sound folder.
+    - Created notify.py in src folder.
+ - Code:
+    - Added application name.
+    - Added notifications sound to new messages.
+    - Added options for notifications in settings.
+    - Added dark mode options for use in others webapps.
+###
+
+### Changed / Modificado
+ - Files and Sources:
+    - Rename whats.py to main.py in src.
+ - Code:
+    - Refactory code.
+    - Modify About.
+    - Created 'prevent' function for prevent outdated browser.
+    - Importation of modules optimized.
+    - Using variable for user agent.
+    - Apply settings emiting signals.
+ - Changed creation settings.json file.
+###
+
+### Removed / Removido
+ - Files and Sources:
+    - Removed 'warning.py'.
+ - Code:
+    - Removed function for user agent.
+###
+
+### Fixed / Corrigido
+ - Fixed error:
+-----------------------------------------------------------------
+    Traceback (most recent call last):
+      File "/usr/share/whats/whats.py", line 267, in eventFilter
+        if obj.parent() == self:
+    TypeError: parent(self, QModelIndex): not enough arguments
+-----------------------------------------------------------------
+ - Code:
+    - Fixed option for open in system tray.
+    - Fixed auto reload.
+    - Fixed settings for trayicon.
+    - Prevent open minimized when show window.
+###
+
+#####################################################################
+
+
+## [ 1.0 ] - 2021-11-09 #############################################
 
 ### Added / Adicionado
  - Added install.sh
  - Added face.png and face.desktop in appdata.
  - Added clean_cache and clean_conf in common.
  - Added sources in src.
- - Addde icons in icon_status.
+ - Added icons in icon_status.
 ###
 
-##########################################################################
+#####################################################################
