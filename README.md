@@ -1,4 +1,8 @@
-# Face - Facebook Desktop
+<h1 align="center">
+    Face - Facebook Desktop
+    <br/><br/>
+    <a><img src="https://raw.githubusercontent.com/mxnt10/face/master/common/preview.png"></a>
+</h1>
 
 Unofficial webapp for Facebook website using python and PyQt5 with PyQtWebEngine.
 
