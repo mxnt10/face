@@ -5,8 +5,10 @@ Unofficial webapp for Facebook website using python and PyQt5 with PyQtWebEngine
 ### Required packages:
 
 - python >= 3.6
-- PyQt5 >= 5.15.5
-- PyQtWebEngine >= 5.15.5
+- PyQt5 >= 5.15.2
+- PyQtWebEngine >= 5.15.2
+- lxml >= 4.7.1
+- libnotify (notify-send) >= 0.7.9
 
 ### Installation instructions:
 
@@ -29,7 +31,8 @@ Therefore, they can be distributed and / or modified within the terms of the *GN
 
 ### Comments
 
-In case of bugs, problems of execution or construction of packages, constructive criticism, among others, please submit a message to one of the contacts below.
+In case of bugs, problems of execution or construction of packages, constructive criticism, among others,
+please submit a message to one of the contacts below.
 
 ### Contact
 
