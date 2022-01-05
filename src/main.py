@@ -149,9 +149,9 @@ class MainWindow(QMainWindow):
     # Função que manipula o código-fonte do webapp para checar as mensagens não lidas, emitindo sons,
     # exibindo mensagens e alterando o ícone de notificação.
     def processHtml(self, htm):
-        res = html.fromstring(htm)
-        title = res.xpath('//title')
         try:
+            res = html.fromstring(htm)
+            title = res.xpath('//title')
             if not __err__ in title[0].text:
                 verifyNotify(self, res)
             if __err__ in title[0].text:  # Em caso de erro de conexão o título inicial não se altera
