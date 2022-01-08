@@ -6,15 +6,20 @@
 
 Unofficial webapp for Facebook website using python and PyQt5 with PyQtWebEngine.
 
-### Required packages:
+### Required packages
 
 - python >= 3.6
-- PyQt5 >= 5.15.2
-- PyQtWebEngine >= 5.15.2
-- lxml >= 4.7.1
 - libnotify (notify-send) >= 0.7.9
 
-### Installation instructions:
+### Required python modules
+
+- lxml >= 4.7.1
+- PyQt5 >= 5.15.2
+- PyQtWebEngine >= 5.15.2
+- requests >= 2.25.1
+- soupsieve >= 2.3.1
+
+### Installation instructions
 
 To install "Face", use the following commands:
 ```sh
