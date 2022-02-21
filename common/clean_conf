@@ -1,4 +1,4 @@
 #!/bin/bash
 
-rm -r ~/.config/Face
-rm -r ~/.local/share/Face
+rm -rf ~/.config/Face
+rm -rf ~/.local/share/Face

@@ -10,12 +10,12 @@ from sys import argv
 from threading import Thread
 
 # Módulos do PyQt5
-from PyQt5.QtCore import QUrl, QFileInfo, pyqtSlot, QMargins, Qt, QEvent, QTimer, pyqtSignal
-from PyQt5.QtGui import QIcon, QDesktopServices
+from PyQt5.QtCore import QUrl, QFileInfo, pyqtSlot, QMargins, Qt, QEvent, QTimer, pyqtSignal, QTranslator
+from PyQt5.QtGui import QIcon, QDesktopServices, QKeySequence
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtWebEngineWidgets import (QWebEngineView, QWebEnginePage, QWebEngineDownloadItem, QWebEngineSettings,
                                       QWebEngineProfile)
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QSystemTrayIcon, QMenu, QAction
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QSystemTrayIcon, QMenu, QAction, QShortcut
 
 # Modulos integrados (src)
 from about import AboutDialog
@@ -23,7 +23,7 @@ from agent import user_agent, prevent
 from jsonTools import checkSettings, set_json, write_json
 from notify import verifyNotify
 from setting import SettingDialog
-from utils import setIcon, checkUpdate
+from utils import setIcon, checkUpdate, setTranslate
 from version import __appname__, __pagename__, __url__, __desktop__, __err__
 
 # Variáveis globais
@@ -39,6 +39,7 @@ force_open_link = False
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
+        self.textUpdate1 = self.textUpdate2 = self.textUpdate3 = self.message1 = self.message2 = self.res = None
         self.start = self.notify_start = self.reload_start = self.ckUpdate = False
         self.notify = self.changeTray = self.soma = 0
 
@@ -79,15 +80,29 @@ class MainWindow(QMainWindow):
         self.changeOpacity()
         self.changeFont()
 
+        # Teclas de atalho
+        self.shortcut1 = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_R), self)
+        self.shortcut1.activated.connect(lambda: self.view.load(QUrl(__url__)))
+        self.shortcut2 = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_Q), self)
+        self.shortcut2.activated.connect(app.quit)
+        self.shortcut3 = QShortcut(QKeySequence(Qt.AltModifier + Qt.Key_S), self)
+        self.shortcut3.activated.connect(self.view.showSettings)
+
         # Criando o tray icon
         self.tray = QSystemTrayIcon()
         self.tray.activated.connect(self.onTrayIconActivated)
         self.tray.setIcon(QIcon(setIcon('warning')))
 
         # Itens para o menu do tray icon
-        self.trayHide = QAction('Hide', self)
-        self.trayShow = QAction('Show', self)
-        self.trayExit = QAction('Exit', self)
+        self.trayHide = QAction(self.tr('Hide'), self)
+        self.trayShow = QAction(self.tr('Show'), self)
+        self.trayExit = QAction(self.tr('Exit'), self)
+
+        # Ícones para o menu do tray icon
+        self.trayHide.setIcon(QIcon.fromTheme('go-down'))
+        self.trayShow.setIcon(QIcon.fromTheme('go-up'))
+        self.trayExit.setIcon(QIcon.fromTheme('application-exit'))
+        self.trayExit.setShortcut('Ctrl+Q')
 
         # Funções para as opções do menu do tray icon
         self.trayHide.triggered.connect(self.on_hide)
@@ -143,9 +158,9 @@ class MainWindow(QMainWindow):
                 self.statusBar().hide()
 
 
-    # Função que manipula o código-fonte do webapp para checar as mensagens não lidas, emitindo sons,
-    # exibindo mensagens e alterando o ícone de notificação.
-    def processHtml(self, htm):
+    # Função que possui o objetivo de ser executada como um thead independentepara resolver problemas
+    # de lentidão durante o uso do webapp.
+    def bs(self, htm, num):
         try:
             res = html.fromstring(htm)
             title = res.xpath('//title')
@@ -165,6 +180,15 @@ class MainWindow(QMainWindow):
                     self.changeTray = 3
         except Exception as err:
             warning('\033[33m %s.\033[m', err)
+
+
+    # Função que manipula o código-fonte do webapp para a checagem das mensagens não lidas, emitindo sons,
+    # exibindo mensagens e alterando o ícone de notificação.
+    def processHtml(self, htm):
+        self.message1 = self.tr('Unread messages.')  # Textos definidos aqui por conta da tradução
+        self.message2 = self.tr('Unread message.')
+        t = Thread(name='scratch', target=self.bs, args=(htm, 1))
+        t.start()
 
 
     # Mostra os links ao passar o mouse sobre eles no statusBar e captura o link numa variável.
@@ -194,6 +218,9 @@ class MainWindow(QMainWindow):
             self.notify_loop.start()
             self.notify_start = True  # Não precisa ficar reativando o som cada vez que o webapp é recarregado
         if set_json('CheckUpdate') and not self.ckUpdate:
+            self.textUpdate1 = self.tr('Update available')  # Textos definidos aqui por conta da tradução
+            self.textUpdate2 = self.tr('A new version is available')
+            self.textUpdate3 = self.tr('New version')
             t = Thread(name='update', target=checkUpdate, args=(self, 1))
             t.start()
             self.ckUpdate = True
@@ -271,12 +298,23 @@ class Browser(QWebEngineView):
         QApplication.instance().installEventFilter(self)
         self.setMouseTracking(True)
 
-        # Define items for create custom menu
-        self.menuExternal = QAction('Open link in the browser')
-        self.menuLinkClip = QAction('Copy link to clipboard')
-        self.menuReload = QAction('Reload')
-        self.menuConfig = QAction('Preferencies')
-        self.menuAbout = QAction('About')
+        # Definindo itens para a criação do menu
+        self.menuExternal = QAction(self.tr('Open link in the browser'))
+        self.menuLinkClip = QAction(self.tr('Copy link to clipboard'))
+        self.menuReload = QAction(self.tr('Reload'))
+        self.menuConfig = QAction(self.tr('Preferencies'))
+        self.menuAbout = QAction(self.tr('About'))
+
+        # Ícones para o menu
+        self.menuExternal.setIcon(QIcon.fromTheme('globe'))
+        self.menuLinkClip.setIcon(QIcon.fromTheme('edit-copy'))
+        self.menuReload.setIcon(QIcon.fromTheme('view-refresh'))
+        self.menuConfig.setIcon(QIcon.fromTheme('configure'))
+        self.menuAbout.setIcon(QIcon.fromTheme('help-about'))
+
+        # Teclas de atalho
+        self.menuReload.setShortcut('Ctrl+R')
+        self.menuConfig.setShortcut('Alt+S')
 
         # Add functions for options menu
         self.menuExternal.triggered.connect(self.externalBrowser)
@@ -396,6 +434,9 @@ if __name__ == '__main__':
     lang = getdefaultlocale()[0]
     QWebEngineProfile.defaultProfile().setHttpAcceptLanguage(lang.split('_')[0])
     clipboard = app.clipboard()
+    translate = QTranslator()
+    translate.load(setTranslate() + '/face_' + lang.split('_')[0] + '.qm')
+    app.installTranslator(translate)
     main = MainWindow()
 
     # Definindo como o programa será aberto

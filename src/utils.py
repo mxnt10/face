@@ -68,15 +68,20 @@ def setDesktop():
 
 # Busca por arquivos de áudio que servirão como tema das mensagens de notificação.
 def setSound(sound):
-    dirSound = __dir__ + '/sound/' + sound + '.mp3'
-    l_dirSound = realpath('../sound/' + sound + '.mp3')  # O realpath é necessário para funcionar no QMediaPlayer
+    dirSound = __dir__ + '/sound/' + sound
+    l_dirSound = realpath('../sound/' + sound)  # O realpath é necessário para funcionar no QMediaPlayer
 
-    try:
-        with open(dirSound):
-            return dirSound  # Esse aqui não precisa realpath, pois é caminho absoluto
-    except Exception as msg:
-        warning('\033[33m %s.\033[32m Use a local sound folder...\033[m', msg)
-        return l_dirSound
+    for ext in ['.mp3', '.wav']:
+        try:
+            with open(dirSound + ext):
+                return dirSound + ext  # Esse aqui não precisa realpath, pois é caminho absoluto
+        except Exception as msg:
+            warning('\033[33m %s.\033[32m Use a local sound folder...\033[m', msg)
+            try:
+                with open(l_dirSound + ext):
+                    return l_dirSound + ext
+            except Exception as msg:
+                warning('\033[33m %s.\033[32m Use a other option...\033[m', msg)
 
 
 # Cria uma lista com as opções de temas de som.
@@ -92,8 +97,22 @@ def listSound():
         return res
 
 
-# Função que verifica se há atualizações disponíveis
+# Verificar localização dos arquivos de tradução.
+def setTranslate():
+    dirTranslate = '../translate'
+    if not isdir(dirTranslate):
+        dirTranslate = __dir__ + '/translate'
+    else:
+        warning('\033[32m Using a local translate folder...\033[m')
+    return dirTranslate
+
+
+# Função que verifica se há atualizações disponíveis.
 def checkUpdate(self, num):
+    """
+    :param self: parâmetro self.
+    :type num: só está aí por conta do multiprocessamento.
+    """
     try:
         res = get('https://raw.githubusercontent.com/mxnt10/' + lower(__appname__) + '/master/RELEASE')
         if res.status_code != 200:
@@ -101,8 +120,9 @@ def checkUpdate(self, num):
 
         new_ver = res.text.split("\n")
         if new_ver[0] != str(__version__):
-            com = 'notify-send --app-name="' + __appname__ + ' - Update available" --expire-time=' +\
-                  str(set_json('TimeMessage')) + ' "A new version is available.\nNew version: ' + new_ver[0] + '"'
+            com = 'notify-send --app-name="' + __appname__ + ' - ' + self.textUpdate1 + '" --expire-time=' +\
+                  str(set_json('TimeMessage')) + ' "' + self.textUpdate2 + '.\n' + self.textUpdate3 +\
+                  ': ' + new_ver[0] + '"'
             run(com, shell=True)
             self.notify_sound.setMedia(QMediaContent(QUrl.fromLocalFile(setSound(set_json('SoundTheme')))))
             self.notify_sound.play()

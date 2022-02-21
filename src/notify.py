@@ -21,9 +21,9 @@ varClass = 'bp9cbjyn bwm1u5wc pq6dq46d datstx6m taijpn5t jb3vyjys jxrgncrl qt6c0
 # Função para exibição de notificação.
 def notifyMessage(self):
     if self.soma > 1:
-        ms = 'notifications not seen.'
+        ms = self.message1
     else:
-        ms = 'notification not seen.'
+        ms = self.message2
     com = 'notify-send --app-name="' + __pagename__ + '" --expire-time=' + str(set_json('TimeMessage')) + \
           ' --icon="' + realpath(setIcon('notify')) + '" "' + str(self.soma) + ' ' + ms + '"'
     run(com, shell=True)

@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
 # Módulos do PyQt5
-from PyQt5.QtCore import QEvent, Qt, pyqtSignal
+from PyQt5.QtCore import QEvent, Qt, pyqtSignal, QUrl
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtWidgets import (QDialog, QDialogButtonBox, QVBoxLayout, QTabWidget, QWidget, QGroupBox, QCheckBox,
                              QRadioButton, QSlider, QGridLayout, QLabel, QSpacerItem, QSizePolicy, QToolTip, QSpinBox,
-                             QComboBox)
+                             QComboBox, QToolButton, QStyle)
 
 # Modulos integrados (src)
 from jsonTools import set_json, write_json
-from utils import setDesktop, listSound
+from utils import setDesktop, listSound, setSound
 
 # Variáveis globais
 enable_dark_mode_option = False
@@ -28,7 +29,7 @@ class SettingDialog(QDialog):
         super(SettingDialog, self).__init__()
 
         # Propriedades gerais
-        self.setWindowTitle('Settings')
+        self.setWindowTitle(self.tr('Settings'))
         self.setFixedSize(0, 0)
 
         # Definindo a aba de configuração geral que vai receber os sinais
@@ -43,10 +44,10 @@ class SettingDialog(QDialog):
 
         # Widget para adicionar as abas
         tabWidget = QTabWidget()
-        tabWidget.addTab(generalTab, 'General')
-        tabWidget.addTab(customTab, 'Custom')
-        tabWidget.addTab(NotifyTab(), 'Notify')
-        tabWidget.addTab(NetworkTab(), 'Network')
+        tabWidget.addTab(generalTab, self.tr('General'))
+        tabWidget.addTab(customTab, self.tr('Custom'))
+        tabWidget.addTab(NotifyTab(), self.tr('Notify'))
+        tabWidget.addTab(NetworkTab(), self.tr('Network'))
 
         # Botão OK
         buttonBox = QDialogButtonBox(QDialogButtonBox.Ok)
@@ -78,12 +79,12 @@ class GeneralTab(QWidget):
         super(GeneralTab, self).__init__()
 
         # Grupos para separar as opções
-        confApp = QGroupBox('Application')
-        startUp = QGroupBox('Startup')
+        confApp = QGroupBox(self.tr('Application'))
+        startUp = QGroupBox(self.tr('Startup'))
 
         # Opções gerais para interface
-        self.autoStart = QCheckBox('Auto start on login')
-        self.showTray = QCheckBox('Show tray icon')
+        self.autoStart = QCheckBox(self.tr('Auto start on login'))
+        self.showTray = QCheckBox(self.tr('Show tray icon'))
 
         # Definir checkbox para autoinicialização
         if set_json('AutoStart'):
@@ -94,9 +95,9 @@ class GeneralTab(QWidget):
             self.showTray.setChecked(True)
 
         # Messagens para os radio buttons
-        self.msg_show = 'Standard startup'
-        self.msg_max = 'Open maximized'
-        self.msg_min = 'Open minimized to system tray'
+        self.msg_show = self.tr('Standard startup')
+        self.msg_max = self.tr('Open maximized')
+        self.msg_min = self.tr('Open minimized to system tray')
 
         # Opções de inicialização
         self.showDefault = QRadioButton(self.msg_show)
@@ -188,7 +189,7 @@ class BoxToolTip(QCheckBox):
 
     def mouseMoveEvent(self, event):
         pos = self.mapToGlobal(event.pos())
-        QToolTip.showText(pos, 'Dark mode will only have effect on next program startup')
+        QToolTip.showText(pos, self.tr('Dark mode will only have effect on next program startup'))
 
 
 # Classe para configurações de customização do programa.
@@ -202,22 +203,23 @@ class CustomTab(QWidget):
         super(CustomTab, self).__init__()
 
         # Grupos para separar as opções
-        customInterface = QGroupBox('Interface')
-        customFont = QGroupBox('Font')
+        customInterface = QGroupBox(self.tr('Interface'))
+        customFont = QGroupBox(self.tr('Font'))
 
         # Opções para definir a fonte
-        self.font = QLabel('Window Size Font: ' + str(set_json('SizeFont')))
+        self.font = QLabel(self.tr('Window Size Font') + ': ' + str(set_json('SizeFont')))
         self.fontSlider = QSlider(Qt.Horizontal)
         self.fontSlider.setRange(6, 20)
+        self.fontSlider.setMinimumWidth(350)
         self.fontSlider.setValue(set_json('SizeFont'))
         self.fontSlider.setTickPosition(QSlider.TicksAbove)
         self.fontSlider.setTickInterval(1)
 
         # Opções para customizar a interface
-        self.showStatus = QCheckBox('Show status bar')
-        self.darkMode = BoxToolTip('Dark mode')
+        self.showStatus = QCheckBox(self.tr('Show status bar'))
+        self.darkMode = BoxToolTip(self.tr('Dark mode'))
         self.darkMode.setFixedWidth(160)
-        self.frameLabel = QLabel('Opacity:')
+        self.frameLabel = QLabel(self.tr('Opacity:'))
         self.frameSlider = QSlider(Qt.Horizontal)
         self.frameSlider.setRange(20, 100)
         self.frameSlider.setValue(set_json('Opacity'))
@@ -293,7 +295,7 @@ class CustomTab(QWidget):
 
     # Alterar valores da fonte em 'settings.json'.
     def setSizeFont(self):
-        self.font.setText('Size Font: ' + str(self.fontSlider.value()))
+        self.font.setText(self.tr('Window Size Font') + ': ' + str(self.fontSlider.value()))
         write_json('SizeFont', self.fontSlider.value())
         self.font_emit.emit()
 
@@ -306,13 +308,16 @@ class NotifyTab(QWidget):
     def __init__(self):
         super(NotifyTab, self).__init__()
 
+        # Para o teste do som de notificação
+        self.test_sound = QMediaPlayer()
+
         # Grupos para separar as opções
-        messageNotify = QGroupBox('Message options')
-        soundNotify = QGroupBox('Sound options')
+        messageNotify = QGroupBox(self.tr('Message options'))
+        soundNotify = QGroupBox(self.tr('Sound options'))
 
         # Opções para opções de notificação
-        self.optionMessage = QCheckBox('View notification messages')
-        self.optionSound = QCheckBox('Emit notification sounds')
+        self.optionMessage = QCheckBox(self.tr('View notification messages'))
+        self.optionSound = QCheckBox(self.tr('Emit notification sounds'))
 
         # Tempo de exibição de notificação
         self.timeMessage = QSpinBox()
@@ -321,16 +326,18 @@ class NotifyTab(QWidget):
         self.timeMessage.setMaximum(15)
         self.timeMessage.setValue(set_json('TimeMessage') / 1000)
         self.timeMessage.valueChanged.connect(lambda: write_json('TimeMessage', self.timeMessage.value() * 1000))
-        labelMessage = QLabel('Showtime (s):')
+        labelMessage = QLabel(self.tr('Showtime') + ' (s):')
         labelMessage.setAlignment(Qt.AlignRight)
 
         # Temas para o som de notificação
         self.soundTheme = QComboBox()
-        labelSound = QLabel('Sound Theme:')
+        labelSound = QLabel(self.tr('Sound Theme:'))
         labelSound.setAlignment(Qt.AlignRight)
         self.soundTheme.addItems(listSound())
         self.soundTheme.setCurrentIndex(listSound().index(set_json('SoundTheme')))
         self.soundTheme.currentIndexChanged.connect(lambda: write_json('SoundTheme', self.soundTheme.currentText()))
+        self.testSound = QToolButton(clicked=self.playSound)
+        self.testSound.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
 
         # Verificando se o statusbar está ativo
         if set_json('NotifyMessage'):
@@ -353,9 +360,10 @@ class NotifyTab(QWidget):
 
         # Definindo o layout para opções de som
         soundLayout = QGridLayout()
-        soundLayout.addWidget(self.optionSound, 0, 0, 1, 4)
+        soundLayout.addWidget(self.optionSound, 0, 0, 1, 5)
         soundLayout.addWidget(labelSound, 1, 0)
         soundLayout.addWidget(self.soundTheme, 1, 1)
+        soundLayout.addWidget(self.testSound, 1, 2)
         soundNotify.setLayout(soundLayout)
 
         # Criando o layout
@@ -385,6 +393,12 @@ class NotifyTab(QWidget):
             write_json('NotifySound', False)
 
 
+    # Função para testar o som de notificação selecionado atualmente.
+    def playSound(self):
+        self.test_sound.setMedia(QMediaContent(QUrl.fromLocalFile(setSound(set_json('SoundTheme')))))
+        self.test_sound.play()
+
+
 ########################################################################################################################
 
 
@@ -394,11 +408,11 @@ class NetworkTab(QWidget):
         super(NetworkTab, self).__init__()
 
         # Opção de autorreconexão
-        connect = QGroupBox('Connection')
-        update = QGroupBox('Update')
-        self.autoReload = QCheckBox('Reload automatically in case of connection fail')
+        connect = QGroupBox(self.tr('Connection'))
+        update = QGroupBox(self.tr('Update'))
+        self.autoReload = QCheckBox(self.tr('Reload automatically in case of connection fail'))
         self.autoReload.toggled.connect(self.setAutoReload)
-        self.checkUpdate = QCheckBox('Check updates on startup')
+        self.checkUpdate = QCheckBox(self.tr('Check updates on startup'))
         self.checkUpdate.toggled.connect(self.setCheckUpdate)
 
         # Definindo opções para o tempo de reconexão
@@ -408,7 +422,7 @@ class NetworkTab(QWidget):
         self.timeReload.setMaximum(15)
         self.timeReload.setValue(set_json('TimeReload') / 1000)
         self.timeReload.valueChanged.connect(lambda: write_json('TimeReload', self.timeReload.value() * 1000))
-        labelReoad = QLabel('Time interval when reloading (s):')
+        labelReoad = QLabel(self.tr('Time interval when reloading') + ' (s):')
         labelReoad.setAlignment(Qt.AlignRight)
 
         # Definindo layout para checagem de atualização
@@ -416,9 +430,12 @@ class NetworkTab(QWidget):
         self.layoutUpdate.addWidget(self.checkUpdate)
         update.setLayout(self.layoutUpdate)
 
-        # Verificando se a opção autoreload está ativa para setar o check box
+        # Verificando se a opção autoreload e checkupdate estão ativas para setar o checkbox
         if set_json('AutoReload'):
             self.autoReload.setChecked(True)
+
+        if set_json('CheckUpdate'):
+            self.checkUpdate.setChecked(True)
 
         # Definindo o layout de reconexão
         startLayout = QGridLayout()
@@ -434,6 +451,9 @@ class NetworkTab(QWidget):
         layout.addWidget(update)
         layout.addItem(QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))  # Espaço por precaução
         self.setLayout(layout)
+
+
+########################################################################################################################
 
 
     # Definindo opção para autoreconexão em 'settings.json'.
