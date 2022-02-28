@@ -33,7 +33,7 @@ def notifyMessage(self):
 def verifyNotify(self, res):
     self.soma = 0
     for tag in res.xpath('//span[@class="' + varClass + '"]'):
-        self.soma += int(tag.text)
+        self.soma += int(tag.text[0])
     if self.soma != self.notify and self.soma != 0:
         if self.isHidden() or int(self.windowState()) == 1 or int(self.windowState()) == 3:
             if set_json('NotifySound'):

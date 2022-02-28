@@ -3,7 +3,7 @@ __appname__ = 'Face'
 
 __pagename__ = __appname__ + ' - FaceBook Desktop'
 
-__version__ = '2.4'
+__version__ = '2.5'
 
 __url__ = 'https://www.facebook.com/'
 
