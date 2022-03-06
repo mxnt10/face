@@ -8,6 +8,7 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 ### Added / Adicionado
  - Files and Sources:
     - Added autostart.desktop in appdata.
+    - Extra sounds notifications.
  - Code:
     - Parameter '--system-logon' to system startup.
 ###
