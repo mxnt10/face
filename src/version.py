@@ -3,13 +3,13 @@ __appname__ = 'Face'
 
 __pagename__ = __appname__ + ' - FaceBook Desktop'
 
-__version__ = '2.5'
+__version__ = '2.6'
 
 __url__ = 'https://www.facebook.com/'
 
 __err__ = 'www.facebook.com'
 
-__desktop__ = 'face.desktop'
+__desktop__ = 'face-autostart.desktop'
 
 __dir__ = '/usr/share/face'
 
