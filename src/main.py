@@ -172,7 +172,7 @@ class MainWindow(QMainWindow):
         try:
             res = html.fromstring(htm)
             title = res.xpath('//title')
-            if not __err__ in title[0].text:
+            if not __err__ in title[0].text and res.xpath('//path[@class="p361ku9c"]'):
                 verifyNotify(self, res)
             if __err__ in title[0].text:  # Em caso de erro de conexão o título inicial não se altera
                 if self.changeTray != 1:
