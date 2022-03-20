@@ -29,7 +29,7 @@ from version import __appname__, __pagename__, __url__, __desktop__, __err__
 # Variáveis globais
 cap_url = None
 desk = expanduser('~/.config/autostart/' + __desktop__)
-force_open_link = False
+force_open_link = True
 
 
 ########################################################################################################################
@@ -66,7 +66,6 @@ class MainWindow(QMainWindow):
         self.reload.timeout.connect(lambda: self.view.setUrl(QUrl(__url__)))
 
         # Propriedades gerais
-        self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.setWindowTitle(__pagename__)
         self.setWindowIcon(QIcon(setIcon()))
         self.setMinimumSize(800, 600)
@@ -77,7 +76,9 @@ class MainWindow(QMainWindow):
         self.view.font_emit.connect(self.changeFont)
         self.view.opacity_emit.connect(self.changeOpacity)
         self.view.tray_emit.connect(self.changeTrayIcon)
-        self.view.setPage(WhatsApp(self.view))
+        self.view.back_emit.connect(self.back)
+        self.view.forward_emit.connect(self.forward)
+        self.view.setPage(WebPage(self.view))
         self.view.page().linkHovered.connect(self.link_hovered)
         self.view.loadFinished.connect(self.loaded)
         self.view.load(QUrl(__url__))
@@ -94,7 +95,7 @@ class MainWindow(QMainWindow):
         self.shortcut3 = QShortcut(QKeySequence(Qt.AltModifier + Qt.Key_S), self)
         self.shortcut3.activated.connect(self.view.showSettings)
         self.shortcut4 = QShortcut(QKeySequence(Qt.Key_Backspace), self)
-        self.shortcut4.activated.connect(self.view.back)
+        self.shortcut4.activated.connect(self.back)
 
         # Criando o tray icon
         self.tray = QSystemTrayIcon()
@@ -126,6 +127,18 @@ class MainWindow(QMainWindow):
         self.trayMenu.addAction(self.trayExit)
         self.tray.setContextMenu(self.trayMenu)
         self.changeTrayIcon()
+
+
+    # Função para voltar uma página do webapp.
+    def back(self):
+        self.view.back()
+        self.view.c_previous()
+
+
+    # Função para avançar uma página do webapp.
+    def forward(self):
+        self.view.forward()
+        self.view.c_next()
 
 
 ########################################################################################################################
@@ -234,6 +247,12 @@ class MainWindow(QMainWindow):
             self.ckUpdate = True
 
 
+    # Gambiarra legítima para garantir que a janela vai abrir no topo.
+    def top(self):
+        self.hide()
+        self.show()
+
+
     # Minimizando para o system tray.
     def on_hide(self):
         self.hide()
@@ -254,6 +273,7 @@ class MainWindow(QMainWindow):
             self.show()
             self.setGeometry(self.geometry() - margin)
 
+        QTimer.singleShot(100, self.top)
         self.trayMenu.clear()  # Alterando as opções do menu do tray icon
         self.trayMenu.addAction(self.trayHide)
         self.trayMenu.addAction(self.trayExit)
@@ -288,8 +308,11 @@ class Browser(QWebEngineView):
     font_emit = pyqtSignal()
     opacity_emit = pyqtSignal()
     tray_emit = pyqtSignal()
+    back_emit = pyqtSignal()
+    forward_emit = pyqtSignal()
     def __init__(self):
         super().__init__()
+        self.next = self.previous = 0
         self.menu = QMenu()  # Para criar o menu de contexto
         self.save_url = None
 
@@ -303,6 +326,8 @@ class Browser(QWebEngineView):
         self.setMouseTracking(True)
 
         # Definindo itens para a criação do menu
+        self.menuBack = QAction(self.tr('Back'))
+        self.menuForward = QAction(self.tr('Forward'))
         self.menuExternal = QAction(self.tr('Open link in the browser'))
         self.menuLinkClip = QAction(self.tr('Copy link to clipboard'))
         self.menuReload = QAction(self.tr('Reload'))
@@ -310,6 +335,8 @@ class Browser(QWebEngineView):
         self.menuAbout = QAction(self.tr('About'))
 
         # Ícones para o menu
+        self.menuBack.setIcon(QIcon.fromTheme('go-previous'))
+        self.menuForward.setIcon(QIcon.fromTheme('go-next'))
         self.menuExternal.setIcon(QIcon.fromTheme('globe'))
         self.menuLinkClip.setIcon(QIcon.fromTheme('edit-copy'))
         self.menuReload.setIcon(QIcon.fromTheme('view-refresh'))
@@ -317,10 +344,13 @@ class Browser(QWebEngineView):
         self.menuAbout.setIcon(QIcon.fromTheme('help-about'))
 
         # Teclas de atalho
+        self.menuBack.setShortcut('Backspace')
         self.menuReload.setShortcut('Ctrl+R')
         self.menuConfig.setShortcut('Alt+S')
 
         # Add functions for options menu
+        self.menuBack.triggered.connect(self.back_emit.emit)
+        self.menuForward.triggered.connect(self.forward_emit.emit)
         self.menuExternal.triggered.connect(self.externalBrowser)
         self.menuLinkClip.triggered.connect(lambda: clipboard.setText(self.save_url, mode=clipboard.Clipboard))
         self.menuReload.triggered.connect(lambda: self.setUrl(QUrl(__url__)))  # Método melhor
@@ -329,6 +359,20 @@ class Browser(QWebEngineView):
 
 
 ########################################################################################################################
+
+
+    # Contador que contabiliza as páginas abertas para voltar.
+    def c_next(self):
+        self.next += 1
+        if self.previous > 0:
+            self.previous -= 1
+
+
+    # Contador que contabiliza as páginas retrocedidas para avançar.
+    def c_previous(self):
+        self.previous += 1
+        if self.next > 0:
+            self.next -= 1
 
 
     # Função para abrir as configurações da interface feita por conta das emissões de sinal.
@@ -347,8 +391,12 @@ class Browser(QWebEngineView):
         if not cap_url:  # Garantindo que a variável vai ter o link para abrir
             cap_url = self.save_url
 
-        if cap_url is not None:
+        if cap_url is not None and not 'www.facebook.com' in cap_url and not 'scontent.fnvt' in cap_url:
             QDesktopServices.openUrl(QUrl(cap_url))  # Abrindo no navegador externo
+        elif not 'scontent.fnvt' in cap_url:
+            if self.next == 0:
+                self.previous = 0
+            self.c_next()
         cap_url = None
 
 
@@ -359,6 +407,12 @@ class Browser(QWebEngineView):
             self.menu.addAction(self.menuExternal)
             self.menu.addAction(self.menuLinkClip)
         else:
+            if self.previous > 0:
+                self.menu.addAction(self.menuForward)
+            if self.next > 0:
+                self.menu.addAction(self.menuBack)
+            if self.next > 0 or self.previous > 0:
+                self.menu.addSeparator()
             self.menu.addAction(self.menuReload)
             self.menu.addSeparator()
             self.menu.addAction(self.menuConfig)
@@ -387,7 +441,7 @@ class Browser(QWebEngineView):
 
 
 # Classe para a página do webapp.
-class WhatsApp(QWebEnginePage):
+class WebPage(QWebEnginePage):
     def __init__(self, *args, **kwargs):
         QWebEnginePage.__init__(self, *args, **kwargs)
         self.profile().defaultProfile().setHttpUserAgent(user_agent)  # Não rola nada sem isso
@@ -400,7 +454,7 @@ class WhatsApp(QWebEnginePage):
     def download(self, download):
         old_path = download.path()
         suffix = QFileInfo(old_path).suffix()
-        path = QFileDialog.getSaveFileName(self.view(), "Save File", old_path, "*." + suffix)[0]
+        path = QFileDialog.getSaveFileName(self.view(), self.tr('Save File'), old_path, '*.' + suffix)[0]
         if path:
             download.setPath(path)
             download.accept()

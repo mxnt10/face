@@ -3,10 +3,23 @@ All notable changes to this project will be documented in this file.
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 
+## [ 3.0 ] - 2022-03-19 #############################################
+
+### Added / Adicionado
+ - Context menu to back and forward pages on webapp.
+###
+
+### Fixed / Corrigido
+ - Fixed show window on top.
+###
+
+#####################################################################
+
+
 ## [ 2.7 ] - 2022-03-08 #############################################
 
 ### Added / Adicionado
-    - Added Shortcuts.
+ - Added Shortcuts.
 ###
 
 ### Fixed / Corrigido
