@@ -4,13 +4,12 @@
 # Módulos importados
 from lxml import html  # pip install lxml
 from locale import getdefaultlocale
-from logging import warning
 from os.path import isfile, expanduser
 from sys import argv
 from threading import Thread
 
 # Módulos do PyQt5
-from PyQt5.QtCore import QUrl, QFileInfo, pyqtSlot, QMargins, Qt, QEvent, QTimer, pyqtSignal, QTranslator
+from PyQt5.QtCore import QUrl, QFileInfo, pyqtSlot, QMargins, Qt, QEvent, QTimer, pyqtSignal, QTranslator, qDebug
 from PyQt5.QtGui import QIcon, QDesktopServices, QKeySequence
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtWebEngineWidgets import (QWebEngineView, QWebEnginePage, QWebEngineDownloadItem, QWebEngineSettings,
@@ -200,7 +199,7 @@ class MainWindow(QMainWindow):
                     self.tray.setIcon(QIcon(setIcon('original')))
                     self.changeTray = 3
         except Exception as err:
-            warning('\033[33m %s.\033[m', err)
+            qDebug('\033[31m[DEBUG]\033[33m: ' + str(err) + '.\033[m')
 
 
     # Função que manipula o código-fonte do webapp para a checagem das mensagens não lidas, emitindo sons,
