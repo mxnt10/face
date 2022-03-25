@@ -186,6 +186,8 @@ class MainWindow(QMainWindow):
             title = res.xpath('//title')
             if not __err__ in title[0].text and res.xpath('//path[@class="p361ku9c"]'):
                 verifyNotify(self, res)
+            else:
+                self.soma = 0
             if __err__ in title[0].text:  # Em caso de erro de conexão o título inicial não se altera
                 if self.changeTray != 1:
                     self.tray.setIcon(QIcon(setIcon('error')))
