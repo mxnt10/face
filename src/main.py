@@ -354,12 +354,18 @@ class Browser(QWebEngineView):
         self.menuForward.triggered.connect(self.forward_emit.emit)
         self.menuExternal.triggered.connect(self.externalBrowser)
         self.menuLinkClip.triggered.connect(lambda: clipboard.setText(self.save_url, mode=clipboard.Clipboard))
-        self.menuReload.triggered.connect(lambda: self.setUrl(QUrl(__url__)))  # Método melhor
+        self.menuReload.triggered.connect(self.restart)
         self.menuConfig.triggered.connect(self.showSettings)
         self.menuAbout.triggered.connect(lambda: AboutDialog().exec_())
 
 
 ########################################################################################################################
+
+
+    # Função que reseta os contadores e recarrega a página.
+    def restart(self):
+        self.setUrl(QUrl(__url__))
+        self.next = self.previous = 0
 
 
     # Contador que contabiliza as páginas abertas para voltar.
