@@ -184,7 +184,7 @@ class MainWindow(QMainWindow):
         try:
             res = html.fromstring(htm)
             title = res.xpath('//title')
-            if not __err__ in title[0].text and res.xpath('//path[@class="p361ku9c"]'):
+            if not __err__ in title[0].text and res.xpath('//svg[@class="aghiwhmy"]'):
                 verifyNotify(self, res)
             else:
                 self.soma = 0

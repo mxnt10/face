@@ -13,7 +13,7 @@ from jsonTools import set_json
 from utils import setIcon, setSound
 from version import __pagename__
 
-varClass = 'bp9cbjyn bwm1u5wc pq6dq46d datstx6m taijpn5t jb3vyjys jxrgncrl qt6c0cv9 qnrpqo6b k4urcfbm'
+varClass = 'i85zmo3j qtx5e3l4 fxk3tzhb pytsy3co jcxyg2ei srn514ro p4n9ro91 rl78xhln t4os9e1m mfclru0v'
 
 
 ########################################################################################################################
